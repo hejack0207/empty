@@ -16,7 +16,7 @@ LIBS =	-lutil
 PREFIX = /usr/local
 
 all:
-	${CC} ${CFLAGS} -Wall ${LIBS} -o empty empty.c
+	${CC} ${CFLAGS} -Wall -o empty empty.c ${LIBS}
 
 FreeBSD:	all
 NetBSD:		all
