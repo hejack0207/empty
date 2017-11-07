@@ -743,10 +743,10 @@ void wait4child(int child, char *argv0) {
 /* -------------------------------------------------------------------------- */
 int mfifo(char *fname, int mode) {
    
-   if (mkfifo(fname, S_IFIFO|S_IRWXU) == -1)
-          return -1;
-
-   return open(fname, mode);
+	if (mkfifo(fname, S_IFIFO|S_IRWXU) == -1)
+		return -1;
+	
+	return open(fname, mode);
 
 }
 
