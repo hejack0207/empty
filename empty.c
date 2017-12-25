@@ -33,30 +33,12 @@
 
 /* AIX and OSF1 code by Sylvain DEGUT (sylvain.degut@neuf.fr) 12/2006 */
 
-#ifdef __SCO_VERSION__		/* We want SCO to look like the SVR4 system */
-	#define __SVR4
-#endif
-
-
 #include <unistd.h>
 #include <sys/types.h>
-
-#if defined(__SVR4) || defined(__hpux__)
-	#include <stropts.h>
-#endif
 
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <termios.h>
-
-#ifdef __FreeBSD__
-	#include <libutil.h>
-#endif
-
-#ifdef __OpenBSD__
-	#include <util.h>
-	#define EIDRM EINVAL		/* Thanks "Elisender" <allex_9@ngs.ru> */
-#endif
 
 #if defined (__linux__) || defined (__CYGWIN__)
 	#include <pty.h> 
@@ -65,25 +47,7 @@
 	#include <sys/time.h>      
 #endif
 
-#ifdef __AIX
-	#include <time.h>
-	#include <sys/stropts.h>
-	#include <sys/pty.h> 
-	#include <utmp.h>
-#endif
-
-#ifdef __OSF1
-	#include <sys/termios.h>
-	#include <varargs.h>
-#endif
-
-#ifndef __hpux__
-	#include <sys/select.h>
-#endif
-
-#if !defined(__SVR4) && !defined(__hpux__) && !defined(__AIX) && !defined(__OSF1)
-	#include <err.h>
-#endif
+#include <err.h>
 
 #include <errno.h>
 #include <sys/types.h>
@@ -195,12 +159,6 @@ int main (int argc, char *argv[]) {
 		union semun {
 			int val;
 			struct semid_ds *buf;
-		#ifdef __SVR4
-			ushort_t	*array;
-		#endif
-		#ifdef __hpux__
-			ushort		*array;
-		#endif
 		#ifdef __linux__
 			unsigned short *array;
 			struct seminfo *__buf;		/* buffer for IPC_INFO */
@@ -210,11 +168,6 @@ int main (int argc, char *argv[]) {
 #endif
 	union semun semu;
 	
-#if defined(__SVR4) || defined(__hpux__) || defined(__AIX)
-	char	*slave_name;
-	int	pgrp;
-#endif
-
 #ifndef __linux__
 	while ((ch = getopt(argc, argv, "Scvhfrb:kwslp:i:o:t:L:d")) != -1)
 #else
@@ -510,35 +463,8 @@ int main (int argc, char *argv[]) {
 	if (semctl(sem, 0, IPC_RMID) == -1)
 		(void)syslog(LOG_NOTICE, "Warning: Can't remove semaphore: %d  %m", sem);
 
-#if !defined(__SVR4) && !defined(__hpux__) && !defined(__AIX)
 	if (openpty(&master, &slave, NULL, &tt, &win) == -1)
 		(void)perrxslog(255, "PTY routine failed. Fatal openpty()");
-#else
-	#ifdef __AIX
-		if ((master = open("/dev/ptc", O_RDWR | O_NOCTTY)) == -1)
-			(void)perrxslog(255, "PTY routine failed. Fatal open(\"/dev/ptc\"), ...");
-	#else
-		if ((master = open("/dev/ptmx", O_RDWR)) == -1)
-			(void)perrxslog(255, "PTY routine failed. Fatal open(\"/dev/ptmx\"), ...");
-	#endif
-
-	#ifdef __hpux__  
-		/* See the same definition for Solaris & UW several lines below */
-		if (grantpt(master) == -1)
-			(void)perrxslog(255, "Can't grant access to slave part of PTY: %m");
-	#endif
-	
-	if (unlockpt(master) == -1)
-		(void)perrxslog(255, "PTY routine failed. Fatal unlockpt()");
-
-	if ((slave_name = (char *)ptsname(master)) == NULL)
-		(void)perrxslog(255, "PTY routine failed. Fatal ptsname(master)");
-
-	#if defined(__SVR4) && !defined(__SCO_VERSION__)
-		if (grantpt(master) == -1)
-			(void)perrxslog(255, "Can't grant access to slave part of PTY: %m");
-	#endif
-#endif /* !defined(__SVR4) && !defined(__hpux__) && !defined(__AIX) */
 
 	for (i = 1; i < 32; i++)
 		signal(i, fsignal);	/* hook signals */
@@ -552,42 +478,11 @@ int main (int argc, char *argv[]) {
 	if (child == 0) {
 		(void)close(master);
 
-#if !defined(__SVR4) && !defined(__hpux__) && !defined(__AIX) 
 		login_tty(slave);
 	#ifndef __CYGWIN__
 		cfmakeraw(&tt);
 	#endif
-#else
-		if ((pgrp = setsid()) == -1)
-			(void)syslog(LOG_NOTICE, "Warning: Can't setsid(): %m");
 
-		if ((slave = open(slave_name, O_RDWR)) == -1)
-			(void)perrxslog(255, "Fatal open slave part of PTY %s", slave_name);
-
-	#ifndef __AIX	
-		ioctl(slave, I_PUSH, "ptem");
-		ioctl(slave, I_PUSH, "ldterm");
-		ioctl(slave, I_PUSH, "ttcompat");
-	#endif	
-		/* Duplicate open file descriptor */
-		dup2(slave, 0);
-	       	dup2(slave, 1);
-	       	dup2(slave, 2);
-
-		/* Set foreground the main process */	 
-		if (tcsetpgrp(0, pgrp) == -1) 
-	  	  (void)perrxslog(255, "Fatal tcsetpgrp()");
-
-#endif
-
-#if defined(__SVR4)
-		/* Setup terminal parameters for Solaris to work under cron or java.
-		Thanks to "lang qiu" <qiulang@gmail.com> for the initial line of parameters */
-		tt.c_lflag = ISIG | ICANON | ECHOE | ECHOK | ECHOCTL | ECHOKE | IEXTEN; 
-		tt.c_oflag = TABDLY | OPOST;
-		tt.c_iflag = BRKINT | IGNPAR | ISTRIP | ICRNL | IXON | IMAXBEL;
-		tt.c_cflag = CBAUD | CS8 | CREAD; 
-#endif
 		tt.c_lflag &= ~ECHO; 
 		(void)tcsetattr(STDIN_FILENO, TCSAFLUSH, &tt);
 
@@ -779,14 +674,7 @@ void perrxslog(int ex_code, const char *err_text, ...) {
 	va_list va;
 	
 	va_start(va, err_text);
-#if !defined(__hpux__) && !defined(__AIX) && !defined(__OSF1)
 	(void)vsyslog(LOG_NOTICE, err_text, va);
-#else
-	char err_buf[BUFSIZ];
-
-	vsprintf(err_buf, err_text, va);
-	(void)syslog(LOG_NOTICE, err_buf, "");
-#endif
 	
 	va_end(va);
 	
