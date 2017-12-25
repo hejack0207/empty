@@ -31,8 +31,6 @@
  * SUCH DAMAGE.
  */
 
-/* AIX and OSF1 code by Sylvain DEGUT (sylvain.degut@neuf.fr) 12/2006 */
-
 #include <unistd.h>
 #include <sys/types.h>
 
