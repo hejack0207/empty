@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Wall",
+            "-o",
+            "empty",
+            "empty.c"
+        ],
+        "directory": "/home/he/dev/C/hejack0207/empty.c",
+        "file": "empty.c"
+    }
+]

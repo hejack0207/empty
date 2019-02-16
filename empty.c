@@ -110,7 +110,8 @@ int	sem = -1;
 struct sembuf free_sem = {0, 1, 0};
 
 /* -------------------------------------------------------------------------- */
-int main (int argc, char *argv[]) {
+int main (int argc, char *argv[])
+{
 	struct	winsize win;
 	struct	termios tt;
 	int	i, bl, cc, n, ch;
@@ -544,7 +545,8 @@ int main (int argc, char *argv[]) {
 }
 
 /* -------------------------------------------------------------------------- */
-static void usage(void) {
+static void usage(void)
+{
 	(void)fprintf(stderr,
 "%s-%s usage:\n\
 empty [-d] -f [-i fifo1 -o fifo2] [-p file.pid] [-L file] command [command args]\n\
@@ -558,7 +560,8 @@ empty -h\n", program, version);
 }
 
 /* -------------------------------------------------------------------------- */
-long toint(char *intstr) {
+long toint(char *intstr)
+{
 	int	in;
 
 	in = strtol(intstr, (char **)NULL, 10);
@@ -570,7 +573,8 @@ long toint(char *intstr) {
 }
 
 /* -------------------------------------------------------------------------- */
-long pidbyppid(pid_t ppid, int lflg) {
+long pidbyppid(pid_t ppid, int lflg)
+{
 	char fmask[MAXPATHLEN];
 	char fname[MAXPATHLEN];
 	const char *sep = ".";
@@ -627,14 +631,16 @@ long pidbyppid(pid_t ppid, int lflg) {
 }
 
 /* -------------------------------------------------------------------------- */
-void wait4child(int child, char *argv0) {
+void wait4child(int child, char *argv0)
+{
 	while ((pid = wait3(&status, WNOHANG, 0)) > 0)
 		if (pid == child)  
 			(void)syslog(LOG_NOTICE, "%s exited", argv0);
 }	
 
 /* -------------------------------------------------------------------------- */
-int mfifo(char *fname, int mode) {
+int mfifo(char *fname, int mode)
+{
    
 	if (mkfifo(fname, S_IFIFO|S_IRWXU) == -1)
 		return -1;
@@ -644,7 +650,8 @@ int mfifo(char *fname, int mode) {
 }
 
 /* -------------------------------------------------------------------------- */
-void clean(void) {
+void clean(void)
+{
 	(void)close(master);
        	(void)close(ifd);
        	(void)close(ofd);
@@ -655,7 +662,8 @@ void clean(void) {
 }		
 
 /* -------------------------------------------------------------------------- */
-void perrx(int ex_code, const char *err_text, ...) {
+void perrx(int ex_code, const char *err_text, ...)
+{
 	char err_buf[BUFSIZ];
 	va_list	va;
 
@@ -668,7 +676,8 @@ void perrx(int ex_code, const char *err_text, ...) {
 }
 
 /* -------------------------------------------------------------------------- */
-void perrxslog(int ex_code, const char *err_text, ...) {
+void perrxslog(int ex_code, const char *err_text, ...)
+{
 	va_list va;
 	
 	va_start(va, err_text);
@@ -684,7 +693,8 @@ void perrxslog(int ex_code, const char *err_text, ...) {
 }
 
 /* -------------------------------------------------------------------------- */
-void fsignal(int sig) {
+void fsignal(int sig)
+{
 	switch(sig) {
 		case SIGTERM:
 		case SIGINT:
@@ -704,7 +714,8 @@ void fsignal(int sig) {
 }
 
 /* -------------------------------------------------------------------------- */
-int longargv(int argc, char *argv[]) {
+int longargv(int argc, char *argv[])
+{
 	int i = 0, len = 0, maxlen = 0;
 
 
@@ -719,7 +730,8 @@ int longargv(int argc, char *argv[]) {
 }
 
 /* -------------------------------------------------------------------------- */
-int checkgr(int argc, char *argv[], char *buf, int chkonly) {
+int checkgr(int argc, char *argv[], char *buf, int chkonly)
+{
 	int	i;
 	regex_t re;
 
@@ -742,7 +754,8 @@ int checkgr(int argc, char *argv[], char *buf, int chkonly) {
 }
 
 /* -------------------------------------------------------------------------- */
-int regmatch(const char *string, char *pattern, regex_t *re) {
+int regmatch(const char *string, char *pattern, regex_t *re)
+{
 	int	status;
 
 	/* regcomp() is not needed as it was previously executed by checkgr() */
@@ -779,7 +792,8 @@ char* debug_buffer(const char* b)
 
 /* -------------------------------------------------------------------------- */
 int watch4str(int ifd, int ofd, int argc, char *argv[], 
-		int Sflg, int vflg, int cflg, int timeout) {
+		int Sflg, int vflg, int cflg, int timeout)
+{
 
 	int	n, cc, bl;
 	time_t	stime, ntime;
@@ -866,7 +880,8 @@ int watch4str(int ifd, int ofd, int argc, char *argv[],
 }
 
 /* -------------------------------------------------------------------------- */
-int parsestr(char *dst, char *src, int len, int Sflg) {
+int parsestr(char *dst, char *src, int len, int Sflg)
+{
 	int i, bi;
 	
 	/* Return numbers of chars for response */
