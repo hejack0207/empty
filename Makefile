@@ -33,4 +33,4 @@ deinstall:
 uninstall:	deinstall
 
 clean:
-	rm empty 
+	rm empty

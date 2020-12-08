@@ -1,14 +1,14 @@
 /* empty - run processes under pseudo-terminal sessions
- * 
+ *
  * Copyright (C) 2005-2009 Mikhail E. Zakharov
  * empty was written by Mikhail E. Zakharov. This software was based on the 
  * basic idea of pty version 4.0 Copyright (c) 1992, Daniel J. Bernstein, but
  * no code was ported from pty4.
- * 
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions 
  *  are met:
- *  
+ *
  *  1. Redistributions of source code must retain the above copyright
  *     notice immediately at the beginning of the file, without modification,
  *     this list of conditions, and the following disclaimer.
@@ -39,10 +39,10 @@
 #include <termios.h>
 
 #if defined (__linux__) || defined (__CYGWIN__)
-	#include <pty.h> 
+	#include <pty.h>
 	#include <utmp.h>
 	#include <time.h>
-	#include <sys/time.h>      
+	#include <sys/time.h>
 #endif
 
 #include <err.h>
@@ -67,7 +67,7 @@
 
 #define tmpdir "/tmp"
 #define program "empty"
-#define version "0.6.22i" 
+#define version "0.6.22i"
 
 /* -------------------------------------------------------------------------- */
 static void usage(void);
